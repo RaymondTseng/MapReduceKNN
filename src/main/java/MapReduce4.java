@@ -69,6 +69,7 @@ public class MapReduce4 {
         @Override
         public void reduce(Text id, Iterable<Text> lines, Context context)
                 throws IOException, InterruptedException {
+            // integrate all knn list
             List<Double> integratedKnnList = new ArrayList<>();
             for (Text line : lines){
                 List<Double> knnList = Utils.stringToDoubleList(line.toString());

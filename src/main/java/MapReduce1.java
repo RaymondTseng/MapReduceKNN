@@ -74,6 +74,7 @@ public class MapReduce1 {
                 String[] wordArray = line.split("\t");
                 int x = Integer.parseInt(wordArray[1]);
                 int y = Integer.parseInt(wordArray[2]);
+                // generate id by using Huffman coding
                 String cellId = Utils.getCellId(x, y, this.spaceSize, n);
                 currentCellId = new Text(cellId);
                 context.write(currentCellId, one);
@@ -87,6 +88,7 @@ public class MapReduce1 {
         public void reduce(Text word, Iterable<IntWritable> counts, Context context)
                 throws IOException, InterruptedException {
             int sum = 0;
+            // sum the number of points in single cell
             for (IntWritable count : counts) {
                 sum += count.get();
             }

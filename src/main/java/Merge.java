@@ -16,35 +16,42 @@ public class Merge {
         Map<String, String> outputMergeInfo = new HashMap<>();
         File temp = new File(inputPath);
         File[] listFiles = temp.listFiles();
+        // read all reduce files
         for (File file : listFiles) {
             if (!file.getName().contains("_SUCCESS")) {
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 String line = null;
                 while ((line = br.readLine()) != null) {
                     String[] array = line.split("\t");
-                    if (array.length == 1)
+                    if (array.length != 2)
                         break;
-                    cellInfo.put(array[0], cellInfo.getOrDefault(array[0], 0) + Integer.parseInt(array[1]));
-                    mergeInfo.put(array[0], array[0]);
+                    try {
+                        cellInfo.put(array[0], cellInfo.getOrDefault(array[0], 0) + Integer.parseInt(array[1]));
+                        mergeInfo.put(array[0], array[0]);
+                    }catch (Exception e){
+                        continue;
+                    }
                     //cellInfo.put(array[0], Integer.parseInt(array[1]));
                 }
             }
         }
+        // merge all nodes by using quadtree
         int keyLength = n;
         while (keyLength > 0) {
             List<String> keyList = new ArrayList<String>(cellInfo.keySet());
             for (String key : keyList) {
                 if (key.length() == keyLength){
-                    if (cellInfo.getOrDefault(key, 0) < k) {
-                        mergeInfo.put(key, key.substring(0, key.length() - 1));
-                        for (int i = 0; i < 4; i++){
-                            String _key = key.substring(0, key.length() - 1) + String.valueOf(i);
-                            mergeInfo.put(_key, key.substring(0, key.length() - 1));
+                    // generate parent node
+                    String parent = key.substring(0, key.length() - 1);
+                    cellInfo.put(parent, cellInfo.getOrDefault(parent, 0) + cellInfo.get(key));
+                    // if the number of points is less than k in one node, merge all leave nodes under that parent.
+                    if (cellInfo.get(key) < k){
+                        for (Map.Entry<String, String> entry : mergeInfo.entrySet()){
+                            if (entry.getKey().startsWith(parent)){
+                                mergeInfo.put(entry.getKey(), parent);
+                            }
                         }
                     }
-                    cellInfo.put(key.substring(0, key.length() - 1),
-                            cellInfo.getOrDefault(key.substring(0, key.length() - 1), 0) +
-                                    cellInfo.getOrDefault(key, 0));
                 }
             }
             System.out.println("finished"+String.valueOf(keyLength));
@@ -54,6 +61,7 @@ public class Merge {
         for (Map.Entry<String,String> entry : mergeInfo.entrySet()){
             if (entry.getKey().length() == n){
                 outputMergeInfo.put(entry.getKey(), entry.getValue());
+
             }
         }
         return outputMergeInfo;

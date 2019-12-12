@@ -82,6 +82,7 @@ public class MapReduce2 {
                 int x = Integer.parseInt(wordArray[1]);
                 int y = Integer.parseInt(wordArray[2]);
                 String cellId = Utils.getCellId(x, y, this.spaceSize, n);
+                // using merge information
                 currentCellId = new Text(this.mergeInfo.getOrDefault(cellId, cellId));
                 context.write(currentCellId, new Text(pointId + "\t" + wordArray[1] + "\t" + wordArray[2]));
 
@@ -102,6 +103,7 @@ public class MapReduce2 {
 
             if (points.size() == 0)
                 return;
+            //compute each points' knn list
             List<List<Double>> knnLists = Utils.computeKNNList(points, context.getConfiguration().getInt("k", 0));
             for (int i = 0; i < points.size(); i++){
                 Utils.Point point = points.get(i);
